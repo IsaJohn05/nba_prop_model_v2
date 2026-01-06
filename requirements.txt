@@ -1,0 +1,16 @@
+requests
+pandas
+numpy
+python-dotenv
+scikit-learn
+xgboost
+scipy
+matplotlib
+seaborn
+tqdm
+pyyaml
+openpyxl
+ipykernel
+jupyter
+rapidfuzz
+nba-api
