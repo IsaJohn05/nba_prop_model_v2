@@ -56,12 +56,13 @@ src/
 │   ├── fetch_odds.py
 │   └── clean_odds.py
 │
-├── features/
-│   └── feature_engineering.py
+├── features_v2/
+│   └── build_features_v2.py
 │
-├── model/
-│   ├── selection.py
-│   └── pipeline.py
+├── simulations_v2/
+│   ├── run_simulations_v2.py
+│
+──
 │
 ├── config.py
 
