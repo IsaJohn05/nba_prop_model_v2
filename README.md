@@ -80,6 +80,6 @@ ODDS_API_KEY=your_api_key_here
 ```python
 python run_pipeline_v2.py
 
-Optional: If you want to runner to load the .env file automatically, install dotenv once: pip install python-dotenv
+Optional: If you want the runner to load the .env file automatically, install dotenv once: pip install python-dotenv
 
 ---
