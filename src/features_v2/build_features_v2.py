@@ -355,13 +355,24 @@ def build_features_v2(df_props: pd.DataFrame) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    props_path = "data/processed/props_today.csv"
+    from pathlib import Path
+    PROJECT_ROOT = Path(__file__).resolve().parents[2]  # src/features_v2 -> project root
+    props_path = PROJECT_ROOT / "src" / "data" / "processed" / "props_today.csv"
     df_props = pd.read_csv(props_path)
 
     print("[INFO V2] Building V2 features...")
     df_feat_v2 = build_features_v2(df_props)
 
-    out_path = "data/processed/props_features_today_v2.csv"
+    from pathlib import Path
+
+    PROJECT_ROOT = Path(__file__).resolve().parents[2]  # src/features_v2 -> project root
+    processed_dir = PROJECT_ROOT / "src" / "data" / "processed"
+    processed_dir.mkdir(parents=True, exist_ok=True)
+
+    out_path = processed_dir / "props_features_v2.csv"
+    df_feat_v2.to_csv(out_path, index=False)
+    print(f"[INFO V2] Saved V2 features → {out_path}")
+
     df_feat_v2.to_csv(out_path, index=False)
 
     print(f"[INFO V2] Features built: {len(df_feat_v2)} props")

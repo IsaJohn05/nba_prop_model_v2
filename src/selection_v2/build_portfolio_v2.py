@@ -1,5 +1,7 @@
 import sys
 import os
+from pathlib import Path
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
 import json
@@ -47,18 +49,28 @@ def pick_card_v2(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def save_card_v2(df: pd.DataFrame):
-    os.makedirs("data/results/v2", exist_ok=True)
+    PROJECT_ROOT = Path(__file__).resolve().parents[2]  # src/selection_v2 -> project root
+
+    results_dir = PROJECT_ROOT / "src" / "data" / "results" / "v2"
+    results_dir.mkdir(parents=True, exist_ok=True)
+
+    processed_dir = PROJECT_ROOT / "src" / "data" / "processed"
+    processed_dir.mkdir(parents=True, exist_ok=True)
+
+    experiments_dir = PROJECT_ROOT / "src" / "experiments" / "v2"
+    experiments_dir.mkdir(parents=True, exist_ok=True)
+
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    card_path = f"data/results/v2/final_card_v2_{ts}.csv"
+    card_path = results_dir / f"final_card_v2_{ts}.csv"
     df.to_csv(card_path, index=False)
     print(f"[INFO V2] Saved V2 final card → {card_path}")
 
-    df.to_csv("data/processed/final_card_today_v2.csv", index=False)
-    print("[INFO V2] Saved final_card_today_v2.csv")
+    final_today_path = processed_dir / "final_card_today_v2.csv"
+    df.to_csv(final_today_path, index=False)
+    print(f"[INFO V2] Saved final_card_today_v2.csv → {final_today_path}")
 
     # Save experiment summary
-    os.makedirs("experiments/v2", exist_ok=True)
     metrics = {
         "timestamp": ts,
         "num_picks": int(len(df)),
@@ -67,16 +79,18 @@ def save_card_v2(df: pd.DataFrame):
         "avg_ev": float(df["ev_per_unit"].mean()) if len(df) > 0 else 0.0,
         "avg_confidence": float(df["confidence"].mean()) if "confidence" in df.columns and len(df) > 0 else 0.0,
     }
-    metrics_path = f"experiments/v2/metrics_{ts}.json"
+    metrics_path = experiments_dir / f"metrics_{ts}.json"
     with open(metrics_path, "w") as f:
         json.dump(metrics, f, indent=2)
     print(f"[INFO V2] Saved metrics → {metrics_path}")
 
 
 if __name__ == "__main__":
-    sims_path = "data/processed/props_with_sims_today_v2.csv"
-    if not os.path.exists(sims_path):
-        raise RuntimeError("Run V2 simulations first (run_simulations_v2.py).")
+    PROJECT_ROOT = Path(__file__).resolve().parents[2]  # src/selection_v2 -> project root
+    sims_path = PROJECT_ROOT / "src" / "data" / "processed" / "props_with_sims_today_v2.csv"
+
+    if not sims_path.exists():
+        raise RuntimeError(f"Run V2 simulations first (run_simulations_v2.py). Missing: {sims_path}")
 
     df_sims_v2 = pd.read_csv(sims_path)
     print(f"[INFO V2] Loaded {len(df_sims_v2)} simulated props (V2).")

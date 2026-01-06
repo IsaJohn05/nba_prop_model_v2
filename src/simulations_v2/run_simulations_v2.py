@@ -1,5 +1,7 @@
 import sys
 import os
+from pathlib import Path
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
 import numpy as np
@@ -157,24 +159,46 @@ def run_simulations_v2(df_features: pd.DataFrame, n_sims: int = 10000) -> pd.Dat
 
 
 def save_sim_results_v2(df: pd.DataFrame):
-    os.makedirs("data/results/v2", exist_ok=True)
-    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    # Standardize all outputs under src/data
+    PROJECT_ROOT = Path(__file__).resolve().parents[2]  # src/simulations_v2 -> project root
+    results_dir = PROJECT_ROOT / "src" / "data" / "results" / "v2"
+    results_dir.mkdir(parents=True, exist_ok=True)
 
-    path_full = f"data/results/v2/sim_results_v2_{ts}.csv"
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    path_full = results_dir / f"sim_results_v2_{ts}.csv"
+
     df.to_csv(path_full, index=False)
     print(f"[INFO V2] Saved sim results → {path_full}")
 
-    df.to_csv("data/processed/props_with_sims_today_v2.csv", index=False)
-    print("[INFO V2] Saved props_with_sims_today_v2.csv")
+    processed_path = PROJECT_ROOT / "src" / "data" / "processed" / "props_with_sims_today_v2.csv"
+    processed_path.parent.mkdir(parents=True, exist_ok=True)
+
+    df.to_csv(processed_path, index=False)
+    print(f"[INFO V2] Saved props_with_sims_today_v2.csv → {processed_path}")
 
 
 if __name__ == "__main__":
-    features_path = "data/processed/props_features_today_v2.csv"
-    if not os.path.exists(features_path):
-        raise RuntimeError("Missing props_features_today_v2.csv – run V2 feature builder first.")
+    from pathlib import Path
+
+    PROJECT_ROOT = Path(__file__).resolve().parents[2]  # src/simulations_v2 -> project root
+    processed_dir = PROJECT_ROOT / "src" / "data" / "processed"
+
+    candidate_files = [
+        processed_dir / "props_features_today_v2.csv",
+        processed_dir / "props_features_v2.csv",
+        processed_dir / "props_features_today.csv",
+        processed_dir / "props_features.csv",
+    ]
+
+    features_path = next((p for p in candidate_files if p.exists()), None)
+    if features_path is None:
+        raise RuntimeError(
+            "Missing V2 features file. Expected one of:\n"
+            + "\n".join(str(p) for p in candidate_files)
+        )
 
     df_features_v2 = pd.read_csv(features_path)
-    print(f"[INFO V2] Loaded {len(df_features_v2)} props with V2 features.")
+    print(f"[INFO V2] Loaded {len(df_features_v2)} props with V2 features from {features_path}.")
 
     df_sims_v2 = run_simulations_v2(df_features_v2, n_sims=10000)
     print(f"[INFO V2] Simulated {len(df_sims_v2)} props.")

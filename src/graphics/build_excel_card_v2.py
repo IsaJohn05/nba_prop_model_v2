@@ -2,11 +2,9 @@ import pandas as pd
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from datetime import datetime
-import os
+from pathlib import Path
 
-OUTPUT_PATH = "data/results/v2/final_card_v2.xlsx"
-
-def build_excel_card(df):
+def build_excel_card(df, output_path: Path):
 
     # Fix team reversal
     # Player team should NOT equal opponent team
@@ -21,7 +19,7 @@ def build_excel_card(df):
     df["player_team_name"] = df["correct_team"]
     df["opp_team_name"] = df["correct_opp"]
 
-    df = df.drop(columns=["correct_team","correct_opp"], errors="ignore")
+    df = df.drop(columns=["correct_team", "correct_opp"], errors="ignore")
 
     # Split overs / unders
     overs = df[df["side"] == "over"].reset_index(drop=True)
@@ -41,7 +39,7 @@ def build_excel_card(df):
     ws.merge_cells("A1:F1")
     header_cell = ws["A1"]
     header_cell.value = header_text
-    header_cell.font = Font(size=16, bold=True, color="FFFFFF")  
+    header_cell.font = Font(size=16, bold=True, color="FFFFFF")
     header_cell.fill = PatternFill("solid", fgColor="404040")  # DARK GREY
     header_cell.alignment = Alignment(horizontal="center", vertical="center")
 
@@ -162,15 +160,23 @@ def build_excel_card(df):
     ws.column_dimensions["E"].width = 12  # Odds
     ws.column_dimensions["F"].width = 12  # Rating
 
-    os.makedirs("data/results/v2", exist_ok=True)
-    wb.save(OUTPUT_PATH)
-    print(f"[EXCEL UPDATED V2] Saved → {OUTPUT_PATH}")
+    # Ensure output folder exists then save
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    wb.save(output_path)
+    print(f"[EXCEL UPDATED V2] Saved → {output_path}")
 
 
 if __name__ == "__main__":
-    # Load the FINAL CARD (not raw sims)
-    df = pd.read_csv("data/processed/final_card_today_v2.csv")
+    PROJECT_ROOT = Path(__file__).resolve().parents[1]  # src/graphics -> src -> project root is one more up?
+    # safer: go to project root consistently
+    PROJECT_ROOT = Path(__file__).resolve().parents[2]  # src/graphics -> project root
+
+    final_card_path = PROJECT_ROOT / "src" / "data" / "processed" / "final_card_today_v2.csv"
+    if not final_card_path.exists():
+        raise FileNotFoundError(f"Missing final card file: {final_card_path}. Run build_portfolio_v2.py first.")
+
+    df = pd.read_csv(final_card_path)
     print(f"[V2] Loaded {len(df)} picks for today.")
 
-    build_excel_card(df)
-
+    output_path = PROJECT_ROOT / "src" / "data" / "results" / "v2" / "final_card_v2.xlsx"
+    build_excel_card(df, output_path)
