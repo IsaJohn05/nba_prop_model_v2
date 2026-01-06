@@ -6,11 +6,7 @@ This project is an end-to-end NBA player prop modeling pipeline designed to eval
 This is the second iteration of the model, built with cleaner abstractions, improved feature engineering, and a more modular architecture.
 
 ### Disclamier
-This project is provided for educational and research purposes only.
-No API keys are included
-No raw sportsbook data is included
-No betting picks or recommendations are distributed
-This repository is intended to demonstrate software engineering, data processing, and modeling techniques.
+This project is provided for educational and research purposes only.No API keys are included, No raw sportsbook data is included, No betting picks or recommendations are distributed. This repository is intended to demonstrate software engineering, data processing, and modeling techniques.
 It does not constitute financial, gambling, or betting advice
 
 ---
